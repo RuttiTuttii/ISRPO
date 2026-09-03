@@ -1,0 +1,34 @@
+1 задание
+
+"""C#
+Console.WriteLine("Введите первое слагаемое: ");
+var a = Console.ReadLine();
+var aDouble = Convert.ToDouble(a);
+Console.WriteLine("Введите второе слагаемое: ");
+
+var b = Console.ReadLine();
+var bDouble = Convert.ToDouble(b);
+
+Console.WriteLine($"Сумма первого и второго слагаемого {aDouble + bDouble}");
+"""
+
+2.1 задание - скриншоты в папке проекта "C:\Temp\ispp31\ISRPO\LabWork5"
+
+2.3 задание + скриншоты в папке проекта
+
+"""C#
+Console.WriteLine("Программа в цикле, для завершения, после операций введите 'exit'");
+
+while (Console.ReadLine() != "exit")
+{
+    Console.WriteLine("Введите первое слагаемое: ");
+    var a = Console.ReadLine();
+    var aDouble = Convert.ToDouble(a);
+    Console.WriteLine("Введите второе слагаемое: ");
+    
+    var b = Console.ReadLine();
+    var bDouble = Convert.ToDouble(b);
+
+    Console.WriteLine($"Сумма первого и второго слагаемого {aDouble + bDouble}");
+}
+"""
