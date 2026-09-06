@@ -2,19 +2,27 @@
   "profiles": {
     "Task 1 (Exceptions & NLog)": {
       "commandName": "Project",
-      "commandLineArgs": "1"
+      "commandLineArgs": "1",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000"
     },
     "Task 2 (Custom Exception)": {
       "commandName": "Project",
-      "commandLineArgs": "2"
+      "commandLineArgs": "2",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000"
     },
     "Task 3 (Finally & Using)": {
       "commandName": "Project",
-      "commandLineArgs": "3"
+      "commandLineArgs": "3",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000"
     },
     "Task 4 (Global Handler)": {
       "commandName": "Project",
-      "commandLineArgs": "4"
+      "commandLineArgs": "4",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000"
     },
     "Task 5 (REST API)": {
       "commandName": "Project",
