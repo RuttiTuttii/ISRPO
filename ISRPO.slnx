@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/LabWork5/">
+    <Project Path="LabWork5/Task1_2_DebugTrace/Task1_2_DebugTrace.csproj" />
+    <Project Path="LabWork5/Task3_Assert/Task3_Assert.csproj" />
+    <Project Path="LabWork5/Task4_CallStack/Task4_CallStack.csproj" />
+  </Folder>
+  <Folder Name="/LabWork6/">
+    <Project Path="LabWork6/Task1_Handling/Task1_Handling.csproj" />
+    <Project Path="LabWork6/Task2_CustomException/Task2_CustomException.csproj" />
+    <Project Path="LabWork6/Task3_FinallyUsing/Task3_FinallyUsing.csproj" />
+    <Project Path="LabWork6/Task4_GlobalHandler/Task4_GlobalHandler.csproj" />
+    <Project Path="LabWork6/Task5_RestApi/Task5_RestApi.csproj" />
+  </Folder>
+</Solution>

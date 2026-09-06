@@ -1,0 +1,25 @@
+# .NET & Visual Studio build artifacts
+**/[Bb]in/
+**/[Oo]bj/
+**/.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs & temp test files
+*.log
+crash.log
+errors.log
+stacktrace.txt
+*.tmp
+
+# LLM & Agent artifacts (все, что связано с AI/агентами строго в игноре)
+agents.md
+*.agent.md
+.agents/
+reports/
+*.typ
+prompt*.md
+scratch/
+build_scripts/

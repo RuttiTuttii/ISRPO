@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЛР №5. Задание 5.5: Отладка JavaScript</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        .card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        button { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        .counter { font-size: 18px; font-weight: bold; margin-top: 10px; color: #0f172a; }
+        .hint { background: #f8fafc; border-left: 4px solid #3b82f6; padding: 12px; margin-top: 20px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>ЛР №5 — Задание 5.5: Отладка JavaScript в DevTools</h2>
+        <p>Откройте инструменты разработчика браузера (нажмите <b>F12</b>), перейдите на вкладку <b>Sources</b> (для брейкпоинтов) и <b>Console</b> (для логов).</p>
+        
+        <button class="button-class">Нажми меня (п. 5.5.2)</button>
+        <div class="counter" id="counter-display">Кликов: 0</div>
+
+        <div class="hint">
+            <b>Памятка для отладки:</b>
+            <ul>
+                <li><b>5.5.1:</b> Поставьте точку останова в <code>script.js</code> на строке обработчика и шагайте клавишами F10 (Step Over) и F11 (Step Into).</li>
+                <li><b>5.5.2:</b> Поставьте Condition Breakpoint с условием <code>clickCount >= 3</code> на строке клика.</li>
+                <li><b>5.5.3:</b> В консоли проверьте сообщения <code>console.log</code>, <code>console.warn</code> и <code>console.error</code>.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
