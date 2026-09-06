@@ -13,7 +13,7 @@ public static class Task5_RestApi
         Console.WriteLine("Запуск локального HTTP сервера на http://localhost:5000 ...");
 
         var builder = WebApplication.CreateBuilder(args);
-        // принудительно слушаем только обычный HTTP без всяких сертификатов HTTPS
+        // принудительно слушаем HTTP на localhost без HTTPS
         builder.WebHost.UseUrls("http://localhost:5000");
 
         var app = builder.Build();
@@ -92,8 +92,11 @@ public static class Task5_RestApi
             throw new InvalidOperationException("Имитация сбоя для проверки middleware");
         });
 
-        Console.WriteLine("Сервер запущен. Откройте в браузере: http://localhost:5000\n");
-        Console.WriteLine("Для остановки нажмите Ctrl+C в консоли.");
+        Console.WriteLine("Сервер запущен. Ссылки для проверки:");
+        Console.WriteLine("  -> http://localhost:5000/user?id=1");
+        Console.WriteLine("  -> http://localhost:5000/user?id=abc");
+        Console.WriteLine("  -> http://localhost:5000/user?id=999");
+        Console.WriteLine("\nДля остановки сервера нажмите Ctrl+C в консоли.");
 
         app.Run();
     }

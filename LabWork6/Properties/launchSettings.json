@@ -19,6 +19,8 @@
     "Task 5 (REST API)": {
       "commandName": "Project",
       "commandLineArgs": "5",
+      "launchBrowser": true,
+      "launchUrl": "user?id=1",
       "applicationUrl": "http://localhost:5000"
     }
   }
