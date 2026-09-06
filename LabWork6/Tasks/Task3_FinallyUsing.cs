@@ -4,111 +4,55 @@ public static class Task3_FinallyUsing
 {
     public static void Run()
     {
-        Console.WriteLine("--- Задание 5.3: Использование finally и using ---\n");
+        Console.WriteLine("=== Задание 5.3: Finally и Using ===");
+        var path = "numbers.txt";
 
-        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "numbers.txt");
-
-        // создаем файл с тестовыми числами если его еще нет
-        if (!File.Exists(filePath))
+        // создаем тестовый файл если его еще нет
+        if (!File.Exists(path))
         {
-            File.WriteAllText(filePath, "12\n7\n44\n3\n18\n99\n100\n25\n8");
-            Console.WriteLine($"[ИНФО] создан файл {filePath} с тестовыми данными\n");
+            File.WriteAllLines(path, ["12", "7", "44", "3", "18", "99", "100"]);
         }
 
-        Console.WriteLine("1 - чтение четных чисел через using (автоматический Dispose)");
-        Console.WriteLine("2 - чтение четных чисел через try-finally (явное закрытие файла)");
-        Console.WriteLine("3 - тест обработки FileNotFoundException");
-        Console.Write("выберите вариант (1-3): ");
-
-        string? choice = Console.ReadLine();
-
-        // запускаем выбранный способ чтения
-        switch (choice?.Trim())
-        {
-            case "1":
-                ReadWithUsing(filePath);
-                break;
-            case "2":
-                ReadWithFinally(filePath);
-                break;
-            case "3":
-                ReadWithUsing("non_existent_file.txt");
-                break;
-            default:
-                Console.WriteLine("неверный выбор");
-                break;
-        }
-    }
-
-    // считывание файла через конструкцию using
-    private static void ReadWithUsing(string path)
-    {
-        Console.WriteLine($"\n[USING] открытие файла: {path}");
-
+        // 1. чтение через using
+        Console.WriteLine("\n--- Чтение через using ---");
         try
         {
-            // using гарантирует закрытие ресурса при любом исходе
-            using (var reader = new StreamReader(path))
-            {
-                Console.WriteLine("найденные четные числа:");
-                string? line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (int.TryParse(line.Trim(), out int num) && num % 2 == 0)
-                    {
-                        Console.WriteLine($"  -> четное: {num}");
-                    }
-                }
-            }
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[USING] файл успешно прочитан и освобожден через using");
-            Console.ResetColor();
-        }
-        catch (FileNotFoundException ex)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[FileNotFoundException]: файл '{ex.FileName}' отсутствует на диске!");
-            Console.ResetColor();
-        }
-    }
-
-    // считывание файла через явный блок finally
-    private static void ReadWithFinally(string path)
-    {
-        Console.WriteLine($"\n[FINALLY] открытие файла через StreamReader: {path}");
-        StreamReader? reader = null;
-
-        try
-        {
-            reader = new StreamReader(path);
-            Console.WriteLine("найденные четные числа:");
+            // using автоматически закроет файл при выходе из блока
+            using var reader = new StreamReader(path);
             string? line;
             while ((line = reader.ReadLine()) != null)
             {
-                if (int.TryParse(line.Trim(), out int num) && num % 2 == 0)
+                if (int.TryParse(line, out var n) && n % 2 == 0)
                 {
-                    Console.WriteLine($"  -> четное: {num}");
+                    Console.WriteLine($"Четное: {n}");
                 }
             }
         }
         catch (FileNotFoundException ex)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[ОШИБКА]: файл не найден: {ex.Message}");
-            Console.ResetColor();
+            Console.WriteLine($"Ошибка: {ex.Message}");
+        }
+
+        // 2. чтение через try-finally с явным закрытием
+        Console.WriteLine("\n--- Чтение через try-finally ---");
+        StreamReader? manualReader = null;
+        try
+        {
+            manualReader = new StreamReader(path);
+            string? line;
+            while ((line = manualReader.ReadLine()) != null)
+            {
+                if (int.TryParse(line, out var n) && n % 2 == 0)
+                {
+                    Console.WriteLine($"Четное: {n}");
+                }
+            }
         }
         finally
         {
-            // блок finally выполнится абсолютно всегда
-            if (reader != null)
-            {
-                reader.Close();
-                reader.Dispose();
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("[FINALLY] блок finally гарантированно закрыл файловый дескриптор!");
-                Console.ResetColor();
-            }
+            // в блоке finally гарантированно закрываем ресурс
+            manualReader?.Dispose();
+            Console.WriteLine("Файл гарантированно закрыт в блоке finally");
         }
     }
 }

@@ -1,24 +1,20 @@
 {
   "profiles": {
-    "Task 1-2: Отладка и трассировка": {
+    "Task 1-2 (Debug & Trace)": {
       "commandName": "Project",
-      "commandLineArgs": "task1"
+      "commandLineArgs": "1"
     },
-    "Task 3: Использование Debug.Assert": {
+    "Task 3 (Debug.Assert)": {
       "commandName": "Project",
-      "commandLineArgs": "task3"
+      "commandLineArgs": "3"
     },
-    "Task 4: Исследование стека вызовов": {
+    "Task 4 (Call Stack)": {
       "commandName": "Project",
-      "commandLineArgs": "task4"
+      "commandLineArgs": "4"
     },
-    "Task 5: Отладка JavaScript": {
+    "Task 5 (JavaScript)": {
       "commandName": "Project",
-      "commandLineArgs": "task5"
-    },
-    "Все задания (меню выбора)": {
-      "commandName": "Project",
-      "commandLineArgs": "menu"
+      "commandLineArgs": "5"
     }
   }
 }
