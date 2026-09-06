@@ -1,26 +1,32 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+
 namespace LabWork6.Tasks;
 
 public static class Task5_RestApi
 {
     public static void Run(string[] args)
     {
-        Console.WriteLine("--- Задание 5.5: REST API Сервис (ASP.NET Core) ---\n");
-        Console.WriteLine("запускаем веб-сервер Kestrel на http://localhost:5000 ...");
+        Console.WriteLine("=== Задание 5.5: REST API (ASP.NET Core) ===");
+        Console.WriteLine("Запуск локального HTTP сервера на http://localhost:5000 ...");
 
         var builder = WebApplication.CreateBuilder(args);
+        // принудительно слушаем только обычный HTTP без всяких сертификатов HTTPS
         builder.WebHost.UseUrls("http://localhost:5000");
 
         var app = builder.Build();
 
-        // тестовые пользователи сервиса
+        // тестовая база пользователей
         var mockUsers = new Dictionary<int, object>
         {
-            [1] = new { id = 1, name = "Иван Иванов", role = "Студент", group = "ИСПП-31" },
-            [2] = new { id = 2, name = "Егор Смирнов", role = "Разработчик", group = "ИСПП-31" },
-            [3] = new { id = 3, name = "Алексей Петров", role = "Преподаватель", department = "ИСТ" }
+            [1] = new { id = 1, name = "Иван Иванов", role = "Студент" },
+            [2] = new { id = 2, name = "Егор Смирнов", role = "Разработчик" },
+            [3] = new { id = 3, name = "Алексей Петров", role = "Преподаватель" }
         };
 
-        // middleware глобального перехвата и логирования исключений (п. 5.5.2)
+        // middleware глобального логирования исключений (п. 5.5.2)
         app.Use(async (context, next) =>
         {
             try
@@ -29,7 +35,7 @@ public static class Task5_RestApi
             }
             catch (Exception ex)
             {
-                app.Logger.LogError(ex, "[REST API] Необработанная ошибка на {Path}", context.Request.Path);
+                app.Logger.LogError(ex, "[REST API Ошибка] {Message}", ex.Message);
                 context.Response.StatusCode = 500;
                 context.Response.ContentType = "application/json; charset=utf-8";
                 await context.Response.WriteAsJsonAsync(new
@@ -41,24 +47,22 @@ public static class Task5_RestApi
             }
         });
 
-        // главная страница с подсказками
+        // главная страница со списком доступных ссылок
         app.MapGet("/", () => Results.Content(
-            "<h2>ЛР №6 — Задание 5.5: REST API Обработка исключений</h2>" +
-            "<p>Ссылки для проверки работы сервиса:</p>" +
+            "<h2>ЛР №6 — Задание 5.5: REST API</h2>" +
             "<ul>" +
-            "<li><a href='/user?id=1' target='_blank'>/user?id=1</a> — Успешный запрос (200 OK)</li>" +
-            "<li><a href='/user?id=999' target='_blank'>/user?id=999</a> — Пользователь не найден (404 Not Found)</li>" +
-            "<li><a href='/user?id=abc' target='_blank'>/user?id=abc</a> — Неверный формат ID (400 Bad Request JSON)</li>" +
-            "<li><a href='/user/crash' target='_blank'>/user/crash</a> — Тест сбоя сервера (500 Internal Error)</li>" +
+            "<li><a href='/user?id=1'>/user?id=1</a> — 200 OK</li>" +
+            "<li><a href='/user?id=999'>/user?id=999</a> — 404 Not Found</li>" +
+            "<li><a href='/user?id=abc'>/user?id=abc</a> — 400 Bad Request JSON</li>" +
+            "<li><a href='/user/crash'>/user/crash</a> — 500 Server Error</li>" +
             "</ul>", "text/html; charset=utf-8"));
 
-        // эндпоинт GET /user с валидацией параметра id (п. 5.5.1)
+        // эндпоинт GET /user с валидацией id (п. 5.5.1)
         app.MapGet("/user", (HttpContext context) =>
         {
             string? rawId = context.Request.Query["id"];
-            app.Logger.LogInformation("GET /user id='{RawId}'", rawId);
 
-            // если id не число или пустой — возвращаем HTTP 400 со схемой JSON
+            // если id не передан или не является числом — возвращаем 400 JSON
             if (string.IsNullOrWhiteSpace(rawId) || !int.TryParse(rawId, out int userId))
             {
                 return Results.Json(new
@@ -68,7 +72,7 @@ public static class Task5_RestApi
                 }, statusCode: 400);
             }
 
-            // если юзер не найден — возвращаем HTTP 404
+            // если пользователя с таким id нет — возвращаем 404
             if (!mockUsers.TryGetValue(userId, out var user))
             {
                 return Results.Json(new
@@ -78,20 +82,18 @@ public static class Task5_RestApi
                 }, statusCode: 404);
             }
 
-            // возвращаем найденного юзера со статусом 200 OK
+            // пользователь найден — 200 OK
             return Results.Ok(user);
         });
 
-        // ручка для проверки сбоя 500
+        // эндпоинт для проверки перехвата сбоя (500)
         app.MapGet("/user/crash", () =>
         {
-            throw new InvalidOperationException("Имитация критического сбоя внутри REST API");
+            throw new InvalidOperationException("Имитация сбоя для проверки middleware");
         });
 
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("сервер успешно запущен на http://localhost:5000");
-        Console.WriteLine("для остановки сервера нажмите Ctrl+C в консоли.\n");
-        Console.ResetColor();
+        Console.WriteLine("Сервер запущен. Откройте в браузере: http://localhost:5000\n");
+        Console.WriteLine("Для остановки нажмите Ctrl+C в консоли.");
 
         app.Run();
     }
