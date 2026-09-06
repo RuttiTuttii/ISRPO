@@ -1,6 +1,39 @@
 using LabWork6.Tasks;
 
-// главный интерактивный цикл для запуска любого задания шестой лабораторной
+// проверяем переданный аргумент запуска из профиля Visual Studio
+if (args.Length > 0 && !string.Equals(args[0], "menu", StringComparison.OrdinalIgnoreCase))
+{
+    switch (args[0].ToLowerInvariant())
+    {
+        case "task1":
+        case "1":
+            // сразу запускаем задание 5.1 с NLog
+            Task1_Handling.Run();
+            return;
+        case "task2":
+        case "2":
+            // сразу запускаем задание 5.2 с NegativeNumberException
+            Task2_CustomException.Run();
+            return;
+        case "task3":
+        case "3":
+            // сразу запускаем задание 5.3 с using и finally
+            Task3_FinallyUsing.Run();
+            return;
+        case "task4":
+        case "4":
+            // сразу запускаем задание 5.4 с глобальным обработчиком
+            Task4_GlobalHandler.Run();
+            return;
+        case "task5":
+        case "5":
+            // сразу запускаем веб-сервер REST API на ASP.NET Core
+            Task5_RestApi.Run(args);
+            return;
+    }
+}
+
+// если запущен общий профиль или аргументы не указаны — открываем меню
 while (true)
 {
     try { Console.Clear(); } catch { }

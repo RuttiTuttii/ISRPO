@@ -1,0 +1,31 @@
+{
+  "profiles": {
+    "Task 1: Обработка и NLog": {
+      "commandName": "Project",
+      "commandLineArgs": "task1"
+    },
+    "Task 2: NegativeNumberException": {
+      "commandName": "Project",
+      "commandLineArgs": "task2"
+    },
+    "Task 3: Finally и Using": {
+      "commandName": "Project",
+      "commandLineArgs": "task3"
+    },
+    "Task 4: Глобальный обработчик": {
+      "commandName": "Project",
+      "commandLineArgs": "task4"
+    },
+    "Task 5: REST API Сервис": {
+      "commandName": "Project",
+      "commandLineArgs": "task5",
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5000",
+      "applicationUrl": "http://localhost:5000"
+    },
+    "Все задания (меню выбора)": {
+      "commandName": "Project",
+      "commandLineArgs": "menu"
+    }
+  }
+}

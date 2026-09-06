@@ -1,6 +1,34 @@
 using LabWork5.Tasks;
 
-// главный интерактивный цикл для запуска любого задания пятой лабораторной
+// проверяем переданный аргумент запуска из профиля Visual Studio
+if (args.Length > 0 && !string.Equals(args[0], "menu", StringComparison.OrdinalIgnoreCase))
+{
+    switch (args[0].ToLowerInvariant())
+    {
+        case "task1":
+        case "1":
+            // сразу запускаем задание 5.1 и 5.2 по выбранному профилю
+            Task1_2_DebugTrace.Run();
+            return;
+        case "task3":
+        case "3":
+            // сразу запускаем задание 5.3 с ассертами
+            Task3_Assert.Run();
+            return;
+        case "task4":
+        case "4":
+            // сразу запускаем задание 5.4 со стеком вызовов
+            Task4_CallStack.Run();
+            return;
+        case "task5":
+        case "5":
+            // сразу открываем страницу для отладки JS в браузере
+            Task5_JavaScriptLauncher.Run();
+            return;
+    }
+}
+
+// если запущен общий профиль или аргументы не указаны — открываем меню
 while (true)
 {
     try { Console.Clear(); } catch { }
