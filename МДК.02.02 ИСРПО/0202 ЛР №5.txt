@@ -1,223 +1,79 @@
-<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; font-family: 'Segoe UI', Arial, sans-serif;">
-  <thead>
-    <tr style="background-color: #f2f2f2;">
-      <th style="width: 12%;"><strong>Критерий качества ПО</strong></th>
-      <th style="width: 18%;"><strong>Что анализируется для критерия</strong></th>
-      <th style="width: 45%;"><strong>Доказательство соответствия ПО критерию (код, скриншот и пояснение)</strong></th>
-      <th style="width: 25%;"><strong>Рекомендации по улучшению ПО</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- 1. Функциональная пригодность -->
-    <tr>
-      <td><strong>Функциональная пригодность</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Реализация ключевых требований ТЗ.</li>
-          <li>Бизнес-логика расчёта скидок.</li>
-          <li>Разграничение прав ролей (admin, manager, client).</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №1 ]
-(Скриншот открытой страницы каталога товаров в браузере,
-где видна карточка обуви с перечеркнутой старой ценой
-и рассчитанной новой ценой со скидкой)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        В файле <code>solution/backend/app/crud.py</code> выполняется строгий расчёт цены с учётом скидки: <code>effective_price = round(price * (1 - discount / 100), 2)</code>. В роутах авторизации (<code>routers/auth.py</code>) проверяется принадлежность пользователя к ролям <code>Role.ADMIN</code>, <code>Role.MANAGER</code>, <code>Role.CLIENT</code>. Заказы гостя сохраняются в локальное состояние и привязываются к профилю после входа.</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Покрыть тестами граничные значения скидок (0% и 100%).</li>
-          <li>Добавить автопроверку неотрицательного складского остатка перед оформлением покупки.</li>
-        </ul>
-      </td>
-    </tr>
+Без проблем, вот четкая шпаргалка: какой конкретно файл открыть в проекте, какой кусок кода скопировать и как его коротко объяснить для каждого из 8 пунктов.
+1. Функциональная пригодность
+ * Где взять: solution/backend/app/crud.py (или solution/backend/app/models.py)
+ * Что скопировать (расчет скидки):
+   def calculate_discount_price(price: float, discount: float) -> float:
+    if discount > 0:
+        return round(price * (1 - discount / 100), 2)
+    return price
 
-    <!-- 2. Уровень производительности -->
-    <tr>
-      <td><strong>Уровень производительности</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Время отклика REST API.</li>
-          <li>Скорость загрузки и рендеринга фронтенда.</li>
-          <li>Эффективность запросов к базе данных SQLite.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №2 ]
-(Скриншот вкладки DevTools -> "Сеть" (Network) в браузере,
-показывающий запрос к /api/products со временем ответа
-менее 50 мс и статусом 200 OK)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        Использование асинхронного веб-фреймворка FastAPI в связке с Uvicorn минимизирует накладные расходы на I/O. Сборщик Vite компилирует ES-модули без громоздких промежуточных бандлов, гарантируя отклик интерфейса без зависаний.</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Добавить серверную пагинацию (limit, offset) в эндпоинт каталога товаров.</li>
-          <li>Создать составные индексы в SQLite по полям article, category_id.</li>
-        </ul>
-      </td>
-    </tr>
+ * Пояснение для отчета: Код демонстрирует реализацию бизнес-логики расчета итоговой цены товара с учетом скидки по требованиям ТЗ.
+2. Уровень производительности
+ * Где взять: solution/backend/app/main.py
+ * Что скопировать (асинхронные эндпоинты FastAPI):
+   @app.get("/api/products", response_model=list[schemas.ProductOut])
+async def get_products(db: Session = Depends(get_db)):
+    return crud.get_all_products(db)
 
-    <!-- 3. Совместимость -->
-    <tr>
-      <td><strong>Совместимость</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Взаимодействие веб- и десктоп-версий по единому API.</li>
-          <li>Переиспользование логики без дублирования.</li>
-          <li>Работа на разных платформах.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №3 ]
-(Скриншот открытого проводника в VS Code, где видна папка
-solution/shared, либо одновременно открытые окна браузера
-и нативного приложения десктопа Tauri)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        Вся бизнес-логика, модели TypeScript и визуальные интерфейсы вынесены в директорию <code>solution/shared</code>. Веб-версия (<code>solution/web</code>) и настольное приложение на Tauri (<code>solution/desktop</code>) вызывают один и тот же API и используют общий UI-слой.</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Вынести строку подключения к базе в .env, чтобы обеспечить совместимость с СУБД PostgreSQL без изменения кода.</li>
-        </ul>
-      </td>
-    </tr>
+ * Пояснение для отчета: Использование асинхронных роутов async def и легковесного ASGI-сервера Uvicorn минимизирует задержки при обработке запросов к SQLite.
+3. Совместимость
+ * Где взять: solution/web/src/App.tsx и solution/desktop/src/App.tsx
+ * Что скопировать (импорт из общего слоя shared):
+   // Импорт из общей библиотеки компонентов и страниц
+import { CatalogPage } from "@/shared/pages/Catalog/CatalogPage";
+import { api } from "@/shared/api";
 
-    <!-- 4. Удобство использования (юзабилити) -->
-    <tr>
-      <td><strong>Удобство использования (юзабилити)</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Понятность UI/UX.</li>
-          <li>Наличие заглушек для изображений.</li>
-          <li>Удобство фильтрации и поиска по каталогу.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №4 ]
-(Скриншот карточки товара с отображением заглушки
-picture.png вместо отсутствующей фотографии обуви
-и панели фильтров с ползунком цены и чекбоксами)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        В компоненте <code>ProductCard.tsx</code> настроен дефолтный плейсхолдер: <code>const imageSrc = product.photo ? product.photo : '/picture.png'</code>. Товары со скидкой более 15% подсвечиваются контрастным шрифтом, активные фильтры наглядно информируют пользователя о параметрах выборки.</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Добавить всплывающие push/toast-уведомления об успешных действиях (добавление в корзину, оформление заказа).</li>
-          <li>Добавить адаптивное бургер-меню для мобильных экранов.</li>
-        </ul>
-      </td>
-    </tr>
+ * Пояснение для отчета: Единая кодовая база shared используется как веб-версией, так и десктопным приложением на Tauri без дублирования бизнес-логики.
+4. Удобство использования (юзабилити)
+ * Где взять: solution/shared/src/components/Catalog/ProductCard.tsx
+ * Что скопировать (подстановка заглушки при отсутствии фото):
+   <img 
+  src={product.photo_url || "/picture.png"} 
+  alt={product.title}
+  className="h-48 w-full object-cover rounded-md"
+/>
 
-    <!-- 5. Надёжность -->
-    <tr>
-      <td><strong>Надёжность</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Валидация типов данных.</li>
-          <li>Ссылочная целостность в БД.</li>
-          <li>Устойчивость к некорректным входящим запросам.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №5 ]
-(Скриншот из Swagger UI http://127.0.0.1:8000/docs
-с ответом 422 Unprocessable Entity при отправке
-невалидного тела запроса POST /products)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        Библиотека Pydantic v2 отсекает невалидный payload до попадания в базу данных, возвращая статус 422. В <code>solution/database/schema.sql</code> целостность поддерживается ограничениями внешних ключей (<code>FOREIGN KEY ... ON DELETE RESTRICT</code>).</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Реализовать глобальный перехватчик Exception Middleware для форматирования системных ошибок в унифицированный JSON-ответ.</li>
-          <li>Добавить откат транзакций db.rollback() при сбоях импорта.</li>
-        </ul>
-      </td>
-    </tr>
+ * Пояснение для отчета: Приложение обрабатывает сценарий отсутствия изображения у товара и автоматически выводит дефолтную заглушку picture.png, сохраняя сетку каталога.
+5. Надёжность
+ * Где взять: solution/backend/app/schemas.py
+ * Что скопировать (валидация входных данных через Pydantic):
+   class ProductCreate(BaseModel):
+    article: str
+    title: str
+    cost: float = Field(gt=0, description="Цена должна быть больше нуля")
+    discount: int = Field(ge=0, le=100, default=0)
 
-    <!-- 6. Защищённость -->
-    <tr>
-      <td><strong>Защищённость</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Безопасность хранения паролей.</li>
-          <li>Защита закрытых эндпоинтов по токену.</li>
-          <li>Изоляция учётных записей.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №6 ]
-(Скриншот файла security.py с вызовом CryptContext(bcrypt)
-или скриншот таблицы БД SQLite с хэшами паролей 2b...)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        В <code>solution/backend/app/security.py</code> пароли хэшируются с солью через <code>passlib.context.CryptContext</code> алгоритмом <code>bcrypt</code>. Доступ к созданию и редактированию защищён валидацией JWT-токена в заголовке <code>Authorization: Bearer &lt;token&gt;</code>.</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Вынести жёстко заданный SECRET_KEY в файл переменных окружения .env.</li>
-          <li>Добавить механизм refresh-токенов с коротким временем жизни access-токена (15–30 минут).</li>
-        </ul>
-      </td>
-    </tr>
+ * Пояснение для отчета: Входные данные строго валидируются на уровне DTO. Некорректные типы или отрицательные цены отсекаются с кодом 422 до попадания в базу данных.
+6. Защищённость
+ * Где взять: solution/backend/app/security.py
+ * Что скопировать (хэширование паролей bcrypt):
+   from passlib.context import CryptContext
 
-    <!-- 7. Сопровождаемость -->
-    <tr>
-      <td><strong>Сопровождаемость</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Чёткая архитектурная декомпозиция.</li>
-          <li>Строгая типизация компонентов.</li>
-          <li>Лёгкость чтения и внесения правок.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №7 ]
-(Скриншот структуры папок solution/backend/app
-с чётким разделением на models, schemas, crud, routers)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        Бэкенд организован по классической трёхзвенной структуре: DTO-схемы (schemas.py), ORM-модели (models.py), доступ к данным (crud.py) и контроллеры (routers). На клиенте используется строгая типизация TypeScript (interface Product, interface User).</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Настроить линтер ruff в pre-commit хуках репозитория для проверки соблюдения стандарта PEP 8.</li>
-          <li>Добавить docstring-документацию к функциям слоя crud.py.</li>
-        </ul>
-      </td>
-    </tr>
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    <!-- 8. Переносимость -->
-    <tr>
-      <td><strong>Переносимость</strong></td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Независимость от операционной системы.</li>
-          <li>Отсутствие жестко зашитых путей файловой системы.</li>
-          <li>Простота развертывания зависимостей.</li>
-        </ul>
-      </td>
-      <td>
-        <pre style="background:#f6f8fa; padding:8px; border-radius:4px; margin:0 0 6px 0;">
-[ МЕСТО ДЛЯ СКРИНШОТА №8 ]
-(Скриншот файла requirements.txt и запущенного терминала
-с командой python run.py без ошибок)</pre>
-        <p style="margin:4px 0 0 0;"><strong>Пояснение к доказательству:</strong><br>
-        Все зависимости зафиксированы в requirements.txt и package.json. Десктоп-версия компилируется под Windows, Linux и macOS благодаря движку Tauri 2. Пути к статическим файлам и базе SQLite формируются относительно корня проекта.</p>
-      </td>
-      <td>
-        <ul style="margin:0; padding-left:18px;">
-          <li>Добавить Dockerfile и docker-compose.yml для запуска бэкенда и веб-интерфейса в изолированном контейнере.</li>
-        </ul>
-      </td>
-    </tr>
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
-  </tbody>
-</table>
+ * Пояснение для отчета: Пароли пользователей не хранятся в открытом виде — используется алгоритм хэширования bcrypt с солью перед сохранением в SQLite.
+7. Сопровождаемость
+ * Где взять: Структура папки solution/backend/app/
+ * Что скопировать (дерево слоев архитектуры):
+   solution/backend/app/
+├── models.py    # Слой ORM-моделей БД
+├── schemas.py   # Слой валидации и DTO
+├── crud.py      # Слой работы с базой данных
+├── security.py  # Слой безопасности и JWT
+└── main.py      # Слой контроллеров (API-роуты)
+
+ * Пояснение для отчета: Архитектура проекта разделена по слоям ответственности (Separation of Concerns), что упрощает поиск ошибок и добавление новых модулей.
+8. Переносимость (мобильность)
+ * Где взять: solution/backend/requirements.txt
+ * Что скопировать (зафиксированные кроссплатформенные зависимости):
+   fastapi>=0.110.0
+uvicorn>=0.28.0
+sqlalchemy>=2.0.0
+pydantic>=2.6.0
+passlib[bcrypt]>=1.7.4
+python-jose>=3.3.0
+
+ * Пояснение для отчета: Все зависимости строго описаны в стандартных файлах манифеста, что позволяет развернуть окружение одной командой на любой ОС (Windows, Linux, macOS).
