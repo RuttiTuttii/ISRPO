@@ -2,12 +2,13 @@ using System.Diagnostics;
 
 namespace LabWork5.Tasks;
 
+/// <summary>
+/// Задание 5.5: открытие HTML-демо для отладки JavaScript в браузере.
+/// </summary>
 public static class Task5_JavaScriptLauncher
 {
     public static void Run()
     {
-        Console.WriteLine("--- Задание 5.5: Отладка JavaScript в браузере ---\n");
-
         // вычисляем путь к html-файлу с фронтендом для отладки
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
         string htmlPath = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "Task5_JavaScript", "index.html"));

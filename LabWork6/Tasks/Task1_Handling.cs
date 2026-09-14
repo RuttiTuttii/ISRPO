@@ -4,6 +4,9 @@ using NLog.Targets;
 
 namespace LabWork6.Tasks;
 
+/// <summary>
+/// Задание 5.1: обработка исключений и логирование через NLog (errors.log).
+/// </summary>
 public static class Task1_Handling
 {
     public static void Run()
@@ -21,18 +24,17 @@ public static class Task1_Handling
 
         var logger = LogManager.GetCurrentClassLogger();
 
-        Console.WriteLine("--- Задание 5.1: Обработка исключений и NLog ---");
-        Console.WriteLine("введите 'exit' для возврата в меню.\n");
+        Console.WriteLine("Деление целых чисел. Введите 'exit' для выхода.\n");
 
         while (true)
         {
             Console.Write("введите первое число (делимое): ");
             string? s1 = Console.ReadLine();
-            if (string.Equals(s1?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
+            if (s1 is null || string.Equals(s1.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
 
             Console.Write("введите второе число (делитель): ");
             string? s2 = Console.ReadLine();
-            if (string.Equals(s2?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
+            if (s2 is null || string.Equals(s2.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
 
             // перехватываем возможные исключения ввода и деления
             try

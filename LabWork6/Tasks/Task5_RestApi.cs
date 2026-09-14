@@ -5,11 +5,13 @@ using Microsoft.Extensions.Logging;
 
 namespace LabWork6.Tasks;
 
+/// <summary>
+/// Задание 5.5: REST API на ASP.NET Core (http://localhost:5000).
+/// </summary>
 public static class Task5_RestApi
 {
     public static void Run(string[] args)
     {
-        Console.WriteLine("=== Задание 5.5: REST API (ASP.NET Core) ===");
         Console.WriteLine("Запуск локального HTTP сервера на http://localhost:5000 ...");
 
         var builder = WebApplication.CreateBuilder(args);

@@ -12,8 +12,6 @@ public static class Task4_StorageSwitch
 {
     public static void Run()
     {
-        Console.WriteLine("--- Задание 5.4: SourceSwitch и уровни детализации ---");
-
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
         string warningLog = Path.Combine(baseDir, "storage_warning.log");
         string verboseLog = Path.Combine(baseDir, "storage_verbose.log");

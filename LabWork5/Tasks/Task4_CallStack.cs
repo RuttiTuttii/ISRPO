@@ -1,11 +1,12 @@
 namespace LabWork5.Tasks;
 
+/// <summary>
+/// Задание 5.4: стек вызовов при исключении, сохранение в stacktrace.txt.
+/// </summary>
 public static class Task4_CallStack
 {
     public static void Run()
     {
-        Console.WriteLine("=== Задание 5.4: Call Stack ===");
-
         // ловим деление на ноль на верхнем уровне стека
         try
         {

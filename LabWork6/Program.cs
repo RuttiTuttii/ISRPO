@@ -1,14 +1,14 @@
 using LabWork6.Tasks;
 
-// получаем номер таска из аргументов запуска VS или запрашиваем у пользователя
+// Номер задания из аргументов запуска VS или запрос у пользователя.
 var task = args.FirstOrDefault();
 
 if (string.IsNullOrEmpty(task))
 {
-    Console.WriteLine("=== Выбор задания для LabWork6 ===");
+    Console.WriteLine("=== LabWork6: Исключения и REST API ===");
     Console.WriteLine("1 - Обработка исключений и NLog");
     Console.WriteLine("2 - Пользовательское исключение (NegativeNumberException)");
-    Console.WriteLine("3 - Использование finally и using");
+    Console.WriteLine("3 - finally и using");
     Console.WriteLine("4 - Глобальный обработчик (AppDomain.UnhandledException)");
     Console.WriteLine("5 - REST API сервер (http://localhost:5000)");
     Console.Write("\nВведите номер задания (1-5) [по умолчанию 5]: ");
@@ -21,27 +21,27 @@ if (string.IsNullOrEmpty(task))
 switch (task.ToLower())
 {
     case "1":
-    case "task1":
+        Console.WriteLine("5.1 — исключения и NLog, errors.log");
         Task1_Handling.Run();
         break;
 
     case "2":
-    case "task2":
+        Console.WriteLine("5.2 — NegativeNumberException");
         Task2_CustomException.Run();
         break;
 
     case "3":
-    case "task3":
+        Console.WriteLine("5.3 — finally и using");
         Task3_FinallyUsing.Run();
         break;
 
     case "4":
-    case "task4":
+        Console.WriteLine("5.4 — глобальный обработчик, crash.log");
         Task4_GlobalHandler.Run();
         break;
 
     case "5":
-    case "task5":
+        Console.WriteLine("5.5 — REST API, http://localhost:5000");
         Task5_RestApi.Run(args);
         break;
 

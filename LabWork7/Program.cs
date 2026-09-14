@@ -20,15 +20,19 @@ if (string.IsNullOrEmpty(task))
 switch (task.ToLower())
 {
     case "1":
+        Console.WriteLine("5.1 — исключения в log.txt");
         Task1_Handling.Run();
         break;
     case "2":
+        Console.WriteLine("5.2 — замеры в timings.log");
         await Task2_StopWatch.Run();
         break;
     case "3":
+        Console.WriteLine("5.3 — TraceSource, trace.log");
         Task3_TraceSourceCalculator.Run();
         break;
     case "4":
+        Console.WriteLine("5.4 — SourceSwitch, storage.log");
         Task4_StorageSwitch.Run();
         break;
     default:

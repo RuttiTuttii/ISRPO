@@ -1,17 +1,17 @@
 namespace LabWork6.Tasks;
 
+/// <summary>
+/// Задание 5.2: пользовательское исключение NegativeNumberException.
+/// </summary>
 public static class Task2_CustomException
 {
     public static void Run()
     {
-        Console.WriteLine("--- Задание 5.2: Пользовательские исключения ---");
-        Console.WriteLine("проверка возраста с кастомным классом NegativeNumberException\n");
-
         while (true)
         {
             Console.Write("введите ваш возраст (или 'exit' для выхода): ");
             string? input = Console.ReadLine();
-            if (string.Equals(input?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
+            if (input is null || string.Equals(input.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
 
             // перехватываем наше кастомное исключение
             try
@@ -50,7 +50,7 @@ public static class Task2_CustomException
     }
 }
 
-// класс пользовательского исключения с поддержкой передачи message
+// Пользовательское исключение для отрицательных значений.
 public class NegativeNumberException : Exception
 {
     public NegativeNumberException() : base("Значение не может быть отрицательным.") { }

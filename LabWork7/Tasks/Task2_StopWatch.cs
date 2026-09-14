@@ -16,8 +16,6 @@ public static class Task2_StopWatch
 
     public static async Task Run()
     {
-        Console.WriteLine("--- Задание 5.2: Stopwatch и timings.log ---");
-
         // Готовим файл для операции чтения: numbers.txt из проекта слишком
         // маленький (7 строк), поэтому для честного замера генерируем
         // bench-файл на 200 тыс. строк и меряем его.

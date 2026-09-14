@@ -1,28 +1,20 @@
 {
   "profiles": {
-    "Task 1-2 (Debug & Trace)": {
+    "Task 1 (5.1-5.2 Debug/Trace)": {
       "commandName": "Project",
-      "commandLineArgs": "1",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5005"
+      "commandLineArgs": "1"
     },
-    "Task 3 (Debug.Assert)": {
+    "Task 3 (5.3 Assert)": {
       "commandName": "Project",
-      "commandLineArgs": "3",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5005"
+      "commandLineArgs": "3"
     },
-    "Task 4 (Call Stack)": {
+    "Task 4 (5.4 CallStack)": {
       "commandName": "Project",
-      "commandLineArgs": "4",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5005"
+      "commandLineArgs": "4"
     },
-    "Task 5 (JavaScript)": {
+    "Task 5 (5.5 JavaScript)": {
       "commandName": "Project",
-      "commandLineArgs": "5",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5005"
+      "commandLineArgs": "5"
     }
   }
 }

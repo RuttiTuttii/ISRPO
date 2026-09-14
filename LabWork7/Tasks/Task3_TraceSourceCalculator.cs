@@ -10,8 +10,6 @@ public static class Task3_TraceSourceCalculator
 {
     public static void Run()
     {
-        Console.WriteLine("--- Задание 5.3: TraceSource и TraceListener ---");
-
         Console.Write("Введите первое целое число: ");
         if (!int.TryParse(Console.ReadLine(), out int num1))
         {

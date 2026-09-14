@@ -2,12 +2,13 @@ using System.Diagnostics;
 
 namespace LabWork5.Tasks;
 
+/// <summary>
+/// Задание 5.3: проверки инвариантов через Debug.Assert.
+/// </summary>
 public static class Task3_Assert
 {
     public static void Run()
     {
-        Console.WriteLine("=== Задание 5.3: Debug.Assert ===");
-
         // вызываем метод с нормальными валидными данными
         var price = 1000.0;
         var discount = 0.2;

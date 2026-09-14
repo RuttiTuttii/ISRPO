@@ -2,6 +2,9 @@ using System.Diagnostics;
 
 namespace LabWork5.Tasks;
 
+/// <summary>
+/// Задания 5.1 и 5.2: отладка и трассировка (Debug / Trace).
+/// </summary>
 public static class Task1_2_DebugTrace
 {
     public static void Run()
@@ -10,8 +13,7 @@ public static class Task1_2_DebugTrace
         Trace.WriteLine("[TRACE] запуск задания 5.1 и 5.2: отладка и трассировка");
         Debug.WriteLine("[DEBUG] инициализация модуля трассировки");
 
-        Console.WriteLine("--- Задания 5.1 и 5.2: Отладка и трассировка ---");
-        Console.WriteLine("введите 'exit' в любой момент, чтобы вернуться в меню.\n");
+        Console.WriteLine("Сложение двух чисел. Введите 'exit' для выхода.\n");
 
         // крутим цикл ввода чисел, пока пользователь не решит выйти
         while (true)
@@ -21,8 +23,9 @@ public static class Task1_2_DebugTrace
             Console.Write("введите первое слагаемое (или exit): ");
             string? input1 = Console.ReadLine();
 
-            // проверяем выход из цикла
-            if (string.Equals(input1?.Trim(), "exit", StringComparison.OrdinalIgnoreCase))
+            // проверяем выход из цикла (null — закрытый stdin при pipe)
+            if (input1 is null ||
+                string.Equals(input1.Trim(), "exit", StringComparison.OrdinalIgnoreCase))
             {
                 Trace.WriteLine("[TRACE] пользователь запросил выход из таски");
                 break;
@@ -44,7 +47,8 @@ public static class Task1_2_DebugTrace
             string? input2 = Console.ReadLine();
 
             // повторная проверка на команду выхода
-            if (string.Equals(input2?.Trim(), "exit", StringComparison.OrdinalIgnoreCase))
+            if (input2 is null ||
+                string.Equals(input2.Trim(), "exit", StringComparison.OrdinalIgnoreCase))
             {
                 Trace.WriteLine("[TRACE] выход по команде exit на втором числе");
                 break;

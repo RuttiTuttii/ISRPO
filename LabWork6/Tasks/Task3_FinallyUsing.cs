@@ -1,10 +1,12 @@
 namespace LabWork6.Tasks;
 
+/// <summary>
+/// Задание 5.3: освобождение ресурсов через finally и using.
+/// </summary>
 public static class Task3_FinallyUsing
 {
     public static void Run()
     {
-        Console.WriteLine("=== Задание 5.3: Finally и Using ===");
         var path = "numbers.txt";
 
         // создаем тестовый файл если его еще нет
@@ -14,7 +16,7 @@ public static class Task3_FinallyUsing
         }
 
         // 1. чтение через using
-        Console.WriteLine("\n--- Чтение через using ---");
+        Console.WriteLine("Чтение через using:");
         try
         {
             // using автоматически закроет файл при выходе из блока
@@ -34,7 +36,7 @@ public static class Task3_FinallyUsing
         }
 
         // 2. чтение через try-finally с явным закрытием
-        Console.WriteLine("\n--- Чтение через try-finally ---");
+        Console.WriteLine("\nЧтение через try-finally:");
         StreamReader? manualReader = null;
         try
         {

@@ -10,9 +10,7 @@ public static class Task1_Handling
 
     public static void Run()
     {
-        Console.WriteLine("--- Задание 5.1: Логирование исключений в файл ---");
-        Console.WriteLine("Калькулятор: сложение, вычитание, умножение, деление.");
-        Console.WriteLine("Введите 'exit' для выхода.\n");
+        Console.WriteLine("Калькулятор (+, -, *, /). Введите 'exit' для выхода.\n");
 
         while (true)
         {

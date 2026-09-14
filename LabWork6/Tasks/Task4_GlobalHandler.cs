@@ -1,11 +1,12 @@
 namespace LabWork6.Tasks;
 
+/// <summary>
+/// Задание 5.4: глобальный перехват необработанных исключений (crash.log).
+/// </summary>
 public static class Task4_GlobalHandler
 {
     public static void Run()
     {
-        Console.WriteLine("=== Задание 5.4: Глобальный обработчик ===");
-
         // вешаем глобальный перехватчик на необработанные исключения домена
         AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
         {
