@@ -1,211 +1,122 @@
-using NLog;
-using NLog.Config;
-using NLog.Targets;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Text;
 
 namespace LabWork7.Tasks;
 
+/// <summary>
+/// Задание 5.2: Stopwatch + Debug.WriteLine + timings.log.
+/// Три операции (чтение файла, запрос по API, мат. расчеты),
+/// каждая по 3 раза, среднее по каждой + общее время.
+/// </summary>
 public static class Task2_StopWatch
 {
-    private static readonly HttpClient client = new();
-    private static readonly string logPath = "timings.log";
+    private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(15) };
+    private static readonly string LogPath =
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "timings.log");
 
     public static async Task Run()
     {
-        var config = new LoggingConfiguration();
-        string logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "errors.log");
-        var fileTarget = new FileTarget("logfile")
+        Console.WriteLine("--- Задание 5.2: Stopwatch и timings.log ---");
+
+        // Готовим файл для операции чтения: numbers.txt из проекта слишком
+        // маленький (7 строк), поэтому для честного замера генерируем
+        // bench-файл на 200 тыс. строк и меряем его.
+        string dataFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bench_numbers.txt");
+        if (!File.Exists(dataFile))
         {
-            FileName = logFile,
-            Layout = "${longdate}|${level:uppercase=true}|${logger}|${message} ${exception:format=tostring}"
-        };
-        config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, fileTarget);
-        LogManager.Configuration = config;
-
-        var logger = LogManager.GetCurrentClassLogger();
-
-        Console.WriteLine("--- Задание 5.2: NLog с StopWatch ---");
-        Console.WriteLine("введите 'exit' для возврата в меню.\n");
-
-        var path = "numbers.txt";
-
-        if (!File.Exists(path))
-        {
-            Console.WriteLine("Генерация большого файла для теста...");
-            using var writer = new StreamWriter(path);
-            for (int i = 0; i < 1_000_000; i++)
-            {
-                writer.WriteLine(i % 2 == 0 ? i.ToString() : $"Odd{i}");
-            }
-            Console.WriteLine("Файл сгенерирован.");
+            Console.WriteLine("Генерация файла для теста чтения (200 000 строк)...");
+            using var w = new StreamWriter(dataFile, false, Encoding.UTF8);
+            for (int i = 0; i < 200_000; i++)
+                await w.WriteLineAsync(i % 2 == 0 ? i.ToString() : $"Odd{i}");
         }
 
-        if (File.Exists(logPath))
+        // Чистим лог перед замером, чтобы средние считались по текущему запуску.
+        if (File.Exists(LogPath))
+            File.Delete(LogPath);
+
+        var totalSw = Stopwatch.StartNew();
+
+        var results = new List<(string Name, double AvgMs)>
         {
-            File.Delete(logPath);
-        }
-
-        while (true)
-        {
-            Console.Write("введите 4 для запуска бенчмарка: ");
-            string? s1 = Console.ReadLine();
-            if (string.Equals(s1?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
-
-            try
-            {
-                if (!int.TryParse(s1, out int case1))
-                {
-                    Console.WriteLine("Введите цифру 1, 2, 3 или 4.");
-                    continue;
-                }
-
-                switch (case1)
-                {
-                    case 1:
-                        Console.WriteLine("\n--- Чтение через try-finally ---");
-                        StreamReader? manualReader = null;
-                        try
-                        {
-                            manualReader = new StreamReader(path);
-                            string? line;
-                            int evenCount = 0;
-                            while ((line = manualReader.ReadLine()) != null)
-                            {
-                                if (int.TryParse(line, out var n) && n % 2 == 0)
-                                {
-                                    evenCount++;
-                                    Console.WriteLine($"Четное: {n}");
-                                }
-                            }
-                            Console.WriteLine($"Всего четных найдено: {evenCount}");
-                        }
-                        finally
-                        {
-                            manualReader?.Dispose();
-                            Console.WriteLine("Файл гарантированно закрыт в блоке finally");
-                        }
-                        break;
-
-                    case 2:
-                        try
-                        {
-                            string url = "https://yandex.ru/pogoda/ru/arhangelsk";
-                            string response = await client.GetStringAsync(url);
-                            Console.WriteLine($"Длина ответа: {response.Length}");
-                            Console.WriteLine(response.Substring(0, Math.Min(response.Length, 200)));
-                        }
-                        catch (HttpRequestException ex)
-                        {
-                            Console.WriteLine($"Ошибка HTTP: {ex.Message}");
-                            logger.Error(ex, "Ошибка запроса к погоде");
-                        }
-                        break;
-
-                    case 3:
-                        HeavyMath.StartMath();
-                        break;
-
-                    case 4:
-                        await RunBenchmark(path, logger);
-                        break;
-
-                    default:
-                        Console.WriteLine("Неверный выбор. Введите 1, 2, 3 или 4.");
-                        break;
-                }
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine("Ввод должен быть числом!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Произошла ошибка: {ex.Message}");
-                logger.Error(ex, "Ошибка в главном цикле");
-            }
-        }
-    }
-
-    private static string FormatElapsed(double microseconds)
-    {
-        if (microseconds < 1000)
-            return $"{microseconds:F1} microseconds";
-        return $"{microseconds / 1000:F3} miliseconds";
-    }
-
-    private static async Task RunBenchmark(string filePath, NLog.Logger logger)
-    {
-        Console.WriteLine("\n=== Запуск бенчмарка: 3 операции x 3 раза ===\n");
-
-        var totalStopwatch = new Stopwatch();
-        totalStopwatch.Start();
-
-        var operations = new (string Name, Func<Task> Action)[]
-        {
-            ("ReadTxtFile", async () =>
+            ("ReadTxtFile", await MeasureAsync("ReadTxtFile", 3, () =>
             {
                 int evenCount = 0;
-                using var reader = new StreamReader(filePath);
+                using var reader = new StreamReader(dataFile);
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (int.TryParse(line, out var n))
-                    {
-                        if (n % 2 == 0) evenCount++;
-                    }
+                    if (int.TryParse(line, out int n) && n % 2 == 0)
+                        evenCount++;
                 }
-                _ = evenCount;
-            }),
-            ("ApiRequest", async () =>
+                return Task.FromResult(evenCount);
+            })),
+            ("ApiRequest", await MeasureAsync("ApiRequest", 3, async () =>
             {
                 try
                 {
-                    string url = "https://yandex.ru/pogoda/ru/arhangelsk";
-                    string response = await client.GetStringAsync(url);
-                    _ = response.Length;
+                    // Легкий публичный API; при отсутствии сети фиксируем ошибку в лог.
+                    string response = await Client.GetStringAsync("https://jsonplaceholder.typicode.com/posts/1");
+                    return response.Length;
                 }
-                catch (HttpRequestException ex)
+                catch (Exception ex)
                 {
-                    logger.Error(ex, "Ошибка при бенчмарке API");
+                    string err = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Operation=ApiRequest, Error={ex.GetType().Name}: {ex.Message}";
+                    Debug.WriteLine(err);
+                    File.AppendAllText(LogPath, err + Environment.NewLine, Encoding.UTF8);
+                    Console.WriteLine("  API недоступно: " + ex.Message);
+                    return -1;
                 }
-            }),
-            ("HeavyMath", async () =>
+            })),
+            ("HeavyMath", await MeasureAsync("HeavyMath", 3, () =>
             {
-                await Task.Run(() => HeavyMath.StartMath());
-            })
+                double r = HeavyMath.Compute(1_000_000);
+                return Task.FromResult(r);
+            })),
         };
 
-        var averages = new List<(string Name, double AvgUs)>();
+        totalSw.Stop();
 
-        foreach (var (name, action) in operations)
+        string totalEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Operation=TOTAL, Elapsed={(long)totalSw.Elapsed.TotalMilliseconds} ms";
+        Debug.WriteLine(totalEntry);
+        File.AppendAllText(LogPath, totalEntry + Environment.NewLine, Encoding.UTF8);
+
+        Console.WriteLine();
+        Console.WriteLine("=== Итоги (среднее по 3 запускам) ===");
+        foreach (var (name, avg) in results)
+            Console.WriteLine($"  {name}: {(long)avg} ms");
+        Console.WriteLine($"  TOTAL: {(long)totalSw.Elapsed.TotalMilliseconds} ms");
+        Console.WriteLine();
+        Console.WriteLine("Вывод: обычно дольше всего ApiRequest (сеть + ожидание ответа),");
+        Console.WriteLine("затем HeavyMath (CPU), быстрее всего ReadTxtFile (локальный диск).");
+        Console.WriteLine($"Лог: {LogPath}");
+    }
+
+    private static async Task<double> MeasureAsync<T>(string operation, int repeats, Func<Task<T>> action)
+    {
+        double totalMs = 0;
+
+        for (int i = 0; i < repeats; i++)
         {
-            double totalUs = 0;
+            var sw = Stopwatch.StartNew();
+            _ = await action();
+            sw.Stop();
 
-            for (int i = 0; i < 3; i++)
-            {
-                var sw = Stopwatch.StartNew();
-                await action();
-                sw.Stop();
-                double elapsedUs = sw.Elapsed.TotalMicroseconds;
-                totalUs += elapsedUs;
+            double ms = sw.Elapsed.TotalMilliseconds;
+            totalMs += ms;
 
-                string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Operation={name}, Elapsed={FormatElapsed(elapsedUs)}";
-                Debug.WriteLine(entry);
-                File.AppendAllText(logPath, entry + Environment.NewLine, Encoding.UTF8);
-                Console.WriteLine(entry);
-            }
-
-            double avgUs = totalUs / 3.0;
-            averages.Add((name, avgUs));
-            string avgEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Operation={name}_Average, Elapsed={FormatElapsed(avgUs)}";
-            Debug.WriteLine(avgEntry);
-            File.AppendAllText(logPath, avgEntry + Environment.NewLine, Encoding.UTF8);
-            Console.WriteLine(avgEntry);
-            Console.WriteLine();
+            // Формат строго по методичке: [дата] Operation=..., Elapsed=123 ms
+            string entry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Operation={operation}, Elapsed={(long)ms} ms";
+            Debug.WriteLine(entry); // видно в окне Output -> Debug при отладке
+            File.AppendAllText(LogPath, entry + Environment.NewLine, Encoding.UTF8);
+            Console.WriteLine($"  {entry}");
         }
 
-        totalStopwatch.Stop();
+        double avg = totalMs / repeats;
+        string avgEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Operation={operation}_Average, Elapsed={(long)avg} ms";
+        Debug.WriteLine(avgEntry);
+        File.AppendAllText(LogPath, avgEntry + Environment.NewLine, Encoding.UTF8);
+        Console.WriteLine($"  {avgEntry}");
+
+        return avg;
     }
 }

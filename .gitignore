@@ -2,17 +2,37 @@
 **/[Bb]in/
 **/[Oo]bj/
 **/.vs/
+**/.ionide/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+*.nupkg
+*.snupkg
 
-# Logs & temp test files
+# Test results & coverage
+**/[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+coverage*/
+
+# Publish output
+**/publish/
+
+# Logs & temp test files (пишутся кодом лаб: log.txt, timings.log, trace*.log, storage*.log, errors.log)
 *.log
 crash.log
 errors.log
 stacktrace.txt
 *.tmp
+
+# Сгенерированные данные бенчмарка (Task2, 200 тыс. строк — пересоздаются при запуске)
+**/bench_numbers.txt
+
+# OS junk
+Thumbs.db
+.DS_Store
 
 # LLM & Agent artifacts (все, что связано с AI/агентами строго в игноре)
 agents.md

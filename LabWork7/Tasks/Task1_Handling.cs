@@ -1,119 +1,89 @@
-using NLog;
-using NLog.Config;
-using NLog.Targets;
-
 namespace LabWork7.Tasks;
 
+/// <summary>
+/// Задание 5.1: логирование исключений в файл log.txt через File.AppendAllText.
+/// </summary>
 public static class Task1_Handling
 {
+    private static readonly string LogPath =
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.txt");
+
     public static void Run()
     {
-        // настраиваем NLog программно прямо перед запуском таски
-        var config = new LoggingConfiguration();
-        string logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "errors.log");
-        var fileTarget = new FileTarget("logfile")
-        {
-            FileName = logFile,
-            Layout = "${longdate}|${level:uppercase=true}|${logger}|${message} ${exception:format=tostring}"
-        };
-        config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, fileTarget);
-        LogManager.Configuration = config;
-
-        var logger = LogManager.GetCurrentClassLogger();
-
-        Console.WriteLine("--- Задание 5.1: Обработка исключений и NLog ---");
-        Console.WriteLine("введите 'exit' для возврата в меню.\n");
+        Console.WriteLine("--- Задание 5.1: Логирование исключений в файл ---");
+        Console.WriteLine("Калькулятор: сложение, вычитание, умножение, деление.");
+        Console.WriteLine("Введите 'exit' для выхода.\n");
 
         while (true)
         {
-            Console.Write("введите первое число: ");
+            Console.Write("Введите первое целое число: ");
             string? s1 = Console.ReadLine();
-            if (string.Equals(s1?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
+            if (s1 is null || IsExit(s1)) break;
 
-            Console.Write("введите знак ( + | - | * | / ): ");
-            string? expr = Console.ReadLine();
-            if (string.Equals(expr?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
-
-            Console.Write("введите второе число: ");
+            Console.Write("Введите второе целое число: ");
             string? s2 = Console.ReadLine();
-            if (string.Equals(s2?.Trim(), "exit", StringComparison.OrdinalIgnoreCase)) break;
+            if (s2 is null || IsExit(s2)) break;
 
-            // перехватываем возможные исключения ввода
             try
             {
-                // парсим числа через int.Parse для провокации FormatException при тексте
-                int num1 = int.Parse(s1!);
-                int num2 = int.Parse(s2!);
-                char expr1 = char.Parse(expr!);
+                // int.Parse провоцирует FormatException (текст) и
+                // OverflowException (число вне диапазона Int32).
+                int a = int.Parse(s1!);
+                int b = int.Parse(s2!);
 
-                int res = 0;
-
-                switch (expr1)
+                // checked нужен, чтобы переполнение арифметики
+                // (например, 2000000000 + 2000000000) бросало OverflowException,
+                // а не молча заворачивалось.
+                checked
                 {
-                    case '+':
-                        res = num1 + num2; break;
-                    case '-':
-                        res = num1 - num2; break;
-                    case '*':
-                        res = num1 * num2; break;
-                    case '/':
-                        res = num1 / num2; break;
+                    Console.WriteLine($"  {a} + {b} = {a + b}");
+                    Console.WriteLine($"  {a} - {b} = {a - b}");
+                    Console.WriteLine($"  {a} * {b} = {a * b}");
+                    Console.WriteLine($"  {a} / {b} = {a / b}");
                 }
-
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"результат деления {num1} {expr1} {num2} = {res}\n");
-                Console.ResetColor();
-
-                logger.Info($"Успешный расчет {num1} {expr1} {num2} = {res}");
             }
             catch (FormatException ex)
             {
-                // обрабатываем некорректный ввод букв
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[FormatException] ошибка: введен текст вместо числа!");
-                Console.ResetColor();
-
-                logger.Error(ex, "Пользователь ввел некорректный формат числа");
-            }
-            catch (ArgumentException ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[FormatException] ошибка: неизвестный оператор!");
-                Console.ResetColor();
-
-                logger.Error(ex, "Пользователь ввел неизвесный оператор");
-            }
-            catch (DivideByZeroException ex)
-            {
-                // обрабатываем деление на ноль
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[DivideByZeroException] ошибка: деление на ноль запрещено!");
-                Console.ResetColor();
-
-                logger.Error(ex, "Попытка деления на ноль");
+                Report(ex, "Введен текст вместо числа.");
             }
             catch (OverflowException ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[OverflowException] ошибка: произошло переполнение!");
-                Console.ResetColor();
-
-                logger.Error(ex, "При выполнении операции произошло переполнение");
+                Report(ex, "Число вне диапазона Int32 или переполнение результата.");
+            }
+            catch (DivideByZeroException ex)
+            {
+                Report(ex, "Деление на ноль запрещено.");
             }
             catch (Exception ex)
             {
-                // ловим общее исключение со стек-трейсом
-                Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                Console.WriteLine($"[Общее исключение]: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
-                Console.ResetColor();
-
-                logger.Fatal(ex, "Критическое общее исключение");
+                // fallback для всего остального (ArgumentNullException и т.д.)
+                Report(ex, "Непредвиденная ошибка.");
             }
 
             Console.WriteLine();
         }
 
-        Console.WriteLine($"логи записаны в файл: {logFile}");
+        Console.WriteLine($"Лог исключений: {LogPath}");
+    }
+
+    private static bool IsExit(string? s) =>
+        string.Equals(s?.Trim(), "exit", StringComparison.OrdinalIgnoreCase);
+
+    private static void Report(Exception ex, string friendlyMessage)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"[{ex.GetType().Name}] {friendlyMessage}");
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+
+        // Образец из методички:
+        // [2026-09-10 14:23:11] FormatException: Input string was not in a correct format
+        // + полный текст исключения ex.ToString()
+        string entry =
+            $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex.GetType().Name}: {ex.Message}{Environment.NewLine}" +
+            $"{ex}{Environment.NewLine}" +
+            $"---{Environment.NewLine}";
+
+        File.AppendAllText(LogPath, entry);
     }
 }

@@ -1,19 +1,19 @@
 using LabWork7.Tasks;
 
-// получаем номер таска из аргументов запуска VS или запрашиваем у пользователя
+// Номер задания из аргументов запуска VS или запрос у пользователя.
 var task = args.FirstOrDefault();
 
 if (string.IsNullOrEmpty(task))
 {
-    Console.WriteLine("1 - Обработка исключений и NLog");
-    Console.WriteLine("2 - Пользовательское исключение (NegativeNumberException)");
-    Console.WriteLine("3 - Использование finally и using");
-    Console.WriteLine("4 - Глобальный обработчик (AppDomain.UnhandledException)");
-    Console.WriteLine("5 - REST API сервер (http://localhost:5000)");
-    Console.Write("\nВведите номер задания (1-5) [по умолчанию 5]: ");
+    Console.WriteLine("=== LabWork7: Отладка и логирование ===");
+    Console.WriteLine("1 - 5.1 Логирование исключений в log.txt");
+    Console.WriteLine("2 - 5.2 Stopwatch и timings.log");
+    Console.WriteLine("3 - 5.3 TraceSource Calculator (trace.log)");
+    Console.WriteLine("4 - 5.4 SourceSwitch Storage (storage.log)");
+    Console.Write("\nВведите номер задания (1-4) [по умолчанию 1]: ");
 
     var input = Console.ReadLine()?.Trim();
-    task = string.IsNullOrEmpty(input) ? "5" : input;
+    task = string.IsNullOrEmpty(input) ? "1" : input;
     Console.WriteLine();
 }
 
@@ -23,18 +23,15 @@ switch (task.ToLower())
         Task1_Handling.Run();
         break;
     case "2":
-        Task2_StopWatch.Run();
+        await Task2_StopWatch.Run();
         break;
     case "3":
-        Task4_TraceSourceCalculator.Run();
+        Task3_TraceSourceCalculator.Run();
         break;
     case "4":
-        Task4_GlobalHandler.Run();
-        break;
-    case "5":
-        Task5_RestApi.Run(args);
+        Task4_StorageSwitch.Run();
         break;
     default:
-        Console.WriteLine($"Неизвестный таск: '{task}'. Доступные варианты: 1..5");
+        Console.WriteLine($"Неизвестный таск: '{task}'. Доступные варианты: 1..4");
         break;
 }
