@@ -1,0 +1,9 @@
+2026-09-14 08:56:06.8195|ERROR|LabWork7.Tasks.Task1_Handling|Пользователь ввел некорректный формат числа System.FormatException: The input string 'd' was not in a correct format.
+   at System.Number.ThrowFormatException[TChar](ReadOnlySpan`1 value)
+   at System.Int32.Parse(String s)
+   at LabWork7.Tasks.Task1_Handling.Run() in C:\Temp\ispp31\ISRPO\LabWork7\Tasks\Task1_Handling.cs:line 42
+2026-09-14 09:01:39.9729|INFO|LabWork7.Tasks.Task1_Handling|Успешный расчет 4 / 4 = 1 
+2026-09-14 09:12:12.5506|INFO|LabWork7.Tasks.Task1_Handling|Успешный расчет 4 / 4 = 8 
+2026-09-14 09:13:09.1684|INFO|LabWork7.Tasks.Task1_Handling|Успешный расчет 4 + 3 = 7 
+2026-09-14 09:13:18.8176|ERROR|LabWork7.Tasks.Task1_Handling|Попытка деления на ноль System.DivideByZeroException: Attempted to divide by zero.
+   at LabWork7.Tasks.Task1_Handling.Run() in C:\Temp\ispp31\ISRPO\LabWork7\Tasks\Task1_Handling.cs:line 60
