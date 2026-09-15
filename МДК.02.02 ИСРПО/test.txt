@@ -1,0 +1,253 @@
+Мой косяк — сгенерировал внутреннюю ссылку окружения (sandbox:/...), которую мобильный браузер воспринял как поисковый запрос в Google. Напрямую отдавать бинарные скачиваемые zip-файлы чат не умеет.
+Чтобы не создавать кучу файлов руками, вот готовый one-liner для PowerShell, который сам создаст всю структуру папок и запишет файлы проекта.
+Запусти терминал в корне решения ISRPO и вставь команду:
+$base = "LabWork8"
+New-Item -ItemType Directory -Force -Path "$base/Data", "$base/Models", "$base/Services" | Out-Null
+
+@'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+  </ItemGroup>
+</Project>
+'@ | Set-Content "$base/LabWork8.csproj" -Encoding UTF8
+
+@'
+using LabWork8.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace LabWork8.Data;
+
+public class AppDbContext : DbContext
+{
+    public DbSet<Customer> Customers { get; set; } = null!;
+    public DbSet<Order> Orders { get; set; } = null!;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlite("Data Source=OrderManagement.db");
+        }
+    }
+}
+'@ | Set-Content "$base/Data/AppDbContext.cs" -Encoding UTF8
+
+@'
+using System;
+using System.Collections.Generic;
+
+namespace LabWork8.Models;
+
+public class Customer
+{
+    private string _name = string.Empty;
+
+    public int Id { get; set; }
+
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Имя клиента не может быть пустым.", nameof(value));
+
+            _name = value;
+        }
+    }
+
+    public string Email { get; set; } = string.Empty;
+    public List<Order> Orders { get; set; } = new();
+
+    public void PrintDetails()
+    {
+        Console.WriteLine($"Customer: {Name}");
+        Console.WriteLine($"Email: {Email}");
+    }
+}
+'@ | Set-Content "$base/Models/Customer.cs" -Encoding UTF8
+
+@'
+namespace LabWork8.Models;
+
+public class Order
+{
+    public int Id { get; set; }
+    public double Total { get; set; }
+    public bool IsExpress { get; set; }
+    public int CustomerId { get; set; }
+    public Customer Customer { get; set; } = null!;
+}
+'@ | Set-Content "$base/Models/Order.cs" -Encoding UTF8
+
+@'
+using LabWork8.Models;
+
+namespace LabWork8.Services;
+
+public class OrderPriceCalculator
+{
+    private const double VatRate = 0.20;
+    private const double DiscountRate = 0.10;
+    private const double DiscountThreshold = 10000;
+
+    public double CalculateFinalPrice(Order order)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+
+        double vat = order.Total * VatRate;
+        double discount = order.Total > DiscountThreshold ? order.Total * DiscountRate : 0.0;
+
+        return order.Total - discount + vat;
+    }
+}
+'@ | Set-Content "$base/Services/OrderPriceCalculator.cs" -Encoding UTF8
+
+@'
+using LabWork8.Data;
+using LabWork8.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace LabWork8.Services;
+
+public class CustomerService
+{
+    private readonly AppDbContext _dbContext;
+
+    public CustomerService(AppDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public void AddCustomer(Customer customer)
+    {
+        _dbContext.Customers.Add(customer);
+        _dbContext.SaveChanges();
+    }
+
+    public void PrintCustomerInfo(int customerId)
+    {
+        var customer = _dbContext.Customers
+            .Include(c => c.Orders)
+            .FirstOrDefault(c => c.Id == customerId);
+
+        if (customer == null)
+        {
+            Console.WriteLine($"[Предупреждение] Клиент с ID {customerId} не найден.");
+            return;
+        }
+
+        customer.PrintDetails();
+    }
+}
+'@ | Set-Content "$base/Services/CustomerService.cs" -Encoding UTF8
+
+@'
+using LabWork8.Data;
+using LabWork8.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace LabWork8.Services;
+
+public class OrderService
+{
+    private readonly AppDbContext _dbContext;
+    private readonly OrderPriceCalculator _priceCalculator;
+
+    public OrderService(AppDbContext dbContext, OrderPriceCalculator? priceCalculator = null)
+    {
+        _dbContext = dbContext;
+        _priceCalculator = priceCalculator ?? new OrderPriceCalculator();
+    }
+
+    public void AddOrder(Order order)
+    {
+        _dbContext.Orders.Add(order);
+        _dbContext.SaveChanges();
+    }
+
+    public void PrintOrderDetails(int orderId)
+    {
+        var order = _dbContext.Orders
+            .Include(o => o.Customer)
+            .FirstOrDefault(o => o.Id == orderId);
+
+        if (order == null)
+        {
+            Console.WriteLine($"[Предупреждение] Заказ с ID {orderId} не найден.");
+            return;
+        }
+
+        PrintOrderIdentifier(order);
+        PrintOrderTotal(order);
+        PrintExpressShippingStatus(order);
+        PrintCustomerContact(order);
+    }
+
+    private void PrintOrderIdentifier(Order order) => Console.WriteLine($"Order Id: {order.Id}");
+    private void PrintOrderTotal(Order order) => Console.WriteLine($"Total: {order.Total:C}");
+    private void PrintExpressShippingStatus(Order order) => Console.WriteLine($"Express Shipping: {(order.IsExpress ? "Yes" : "No")}");
+    private void PrintCustomerContact(Order order)
+    {
+        if (order.Customer != null)
+            Console.WriteLine($"Customer Email: {order.Customer.Email}");
+    }
+
+    public double CalculateFinalPrice(Order order) => _priceCalculator.CalculateFinalPrice(order);
+}
+'@ | Set-Content "$base/Services/OrderService.cs" -Encoding UTF8
+
+@'
+using LabWork8.Data;
+using LabWork8.Models;
+using LabWork8.Services;
+
+namespace LabWork8;
+
+internal class Program
+{
+    static void Main(string[] args)
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.WriteLine("=== Лабораторная работа №8: Инспекция и рефакторинг кода ===\n");
+
+        using var dbContext = new AppDbContext();
+        dbContext.Database.EnsureCreated();
+
+        var customerService = new CustomerService(dbContext);
+        var orderService = new OrderService(dbContext);
+
+        var customer = new Customer { Name = "Егор", Email = "egor@example.com" };
+        customerService.AddCustomer(customer);
+
+        var order = new Order { Total = 12500, IsExpress = true, Customer = customer };
+        orderService.AddOrder(order);
+
+        Console.WriteLine("Данные клиента:");
+        customerService.PrintCustomerInfo(customer.Id);
+
+        Console.WriteLine("\nДетали заказа:");
+        orderService.PrintOrderDetails(order.Id);
+
+        double finalPrice = orderService.CalculateFinalPrice(order);
+        Console.WriteLine($"\nИтоговая цена: {finalPrice:F2}");
+    }
+}
+'@ | Set-Content "$base/Program.cs" -Encoding UTF8
+
+Write-Host "Готово! Папка LabWork8 развернута." -ForegroundColor Green
+
+После этого добавь проект в солюшен:
+dotnet sln ISRPO.sln add LabWork8/LabWork8.csproj
+
+А если нужен именно .zip архив для отправки преподу, запакуй прямо из консоли:
+Compress-Archive -Path LabWork8 -DestinationPath LabWork8.zip -Force
+
